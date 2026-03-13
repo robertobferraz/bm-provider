@@ -1,0 +1,16 @@
+services:
+  bm-provider:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bm-provider
+    restart: unless-stopped
+    environment:
+      BM_PROVIDER_HOST: ${BM_PROVIDER_HOST:-0.0.0.0}
+      BM_PROVIDER_PORT: ${BM_PROVIDER_PORT:-8081}
+      BM_PROVIDER_AUTH_TOKEN: ${BM_PROVIDER_AUTH_TOKEN:-}
+      BM_PROVIDER_LANGUAGE: ${BM_PROVIDER_LANGUAGE:-en}
+      BM_PROVIDER_PUBLIC_ONLY: ${BM_PROVIDER_PUBLIC_ONLY:-true}
+      BM_PROVIDER_LOG_LEVEL: ${BM_PROVIDER_LOG_LEVEL:-INFO}
+    ports:
+      - "127.0.0.1:${BM_PROVIDER_PORT_HOST:-18081}:${BM_PROVIDER_PORT:-8081}"

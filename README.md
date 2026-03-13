@@ -72,6 +72,32 @@ docker run --rm -p 8081:8081 \
   bm-provider:latest
 ```
 
+## Docker Compose
+Subir com compose:
+```bash
+docker compose up -d --build
+```
+
+Parar:
+```bash
+docker compose down
+```
+
+Porta publicada no host por padrao:
+```text
+http://127.0.0.1:18081
+```
+
+Exemplo de healthcheck:
+```bash
+curl -s http://127.0.0.1:18081/health
+```
+
+Exemplo de resolve:
+```bash
+curl -s "http://127.0.0.1:18081/resolve?url=https://open.spotify.com/playlist/4CNxQ6HyaMjtHdWmJJb5Dx&kind=playlist&limit=3"
+```
+
 ## Integração com o music-bot
 No `.env` do bot:
 

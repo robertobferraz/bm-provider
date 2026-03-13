@@ -148,15 +148,57 @@ class SpotAPIPlaylistAdapter:
 
     @staticmethod
     def _extract_duration_ms(payload: dict[str, Any]) -> int | None:
-        direct = payload.get("duration_ms")
-        if isinstance(direct, int):
+        def coerce_int(value: Any) -> int | None:
+            if isinstance(value, bool):
+                return None
+            if isinstance(value, int):
+                return value if value > 0 else None
+            if isinstance(value, str):
+                raw = value.strip()
+                if raw.isdigit():
+                    parsed = int(raw)
+                    return parsed if parsed > 0 else None
+            return None
+
+        direct = coerce_int(payload.get("duration_ms"))
+        if direct is not None:
             return direct
+
         duration = payload.get("duration")
         if isinstance(duration, dict):
-            for key in ("totalMilliseconds", "milliseconds"):
-                value = duration.get(key)
-                if isinstance(value, int):
+            for key in ("totalMilliseconds", "milliseconds", "total_ms", "ms"):
+                value = coerce_int(duration.get(key))
+                if value is not None:
                     return value
+
+        queue = [payload]
+        seen: set[int] = set()
+        preferred_keys = {
+            "duration_ms",
+            "durationMs",
+            "totalMilliseconds",
+            "milliseconds",
+            "total_ms",
+            "ms",
+        }
+        while queue:
+            node = queue.pop(0)
+            marker = id(node)
+            if marker in seen:
+                continue
+            seen.add(marker)
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    if key in preferred_keys:
+                        parsed = coerce_int(value)
+                        if parsed is not None:
+                            return parsed
+                    if isinstance(value, (dict, list)):
+                        queue.append(value)
+            elif isinstance(node, list):
+                for item in node:
+                    if isinstance(item, (dict, list)):
+                        queue.append(item)
         return None
 
     @staticmethod
